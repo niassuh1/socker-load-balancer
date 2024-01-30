@@ -1,0 +1,62 @@
+version: '3'
+services:
+  redis-server:
+    image: redis
+    ports:
+      - 6379:6379
+    networks:
+      - myNetwork
+  
+  socket-server-1:
+    build: ./
+    container_name: socket-server-1
+    ports:
+      - 8001:8000
+    environment:
+      - REDIS=redis://172.17.0.1:6379
+      - SERVER=1
+    networks:
+      - myNetwork
+    depends_on:
+      - redis-server
+
+  socket-server-2:
+    build: ./
+    container_name: socket-server-2
+    ports:
+      - 8002:8000
+    environment:
+      - REDIS=redis://172.17.0.1:6379
+      - SERVER=2
+    networks:
+      - myNetwork
+    depends_on:
+      - redis-server
+  
+  socket-server-3:
+    build: ./
+    container_name: socket-server-3
+    ports:
+      - 8003:8000
+    environment:
+      - REDIS=redis://172.17.0.1:6379
+      - SERVER=3
+    networks:
+      - myNetwork
+    depends_on:
+      - redis-server
+
+  nginx:
+    build: ./nginx
+    container_name: nginx-server
+    ports:
+      - 8000:80
+    networks:
+      - myNetwork
+    depends_on:
+      - socket-server-1
+      - socket-server-2
+      - socket-server-3
+
+networks:
+  myNetwork: {}
